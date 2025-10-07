@@ -2,14 +2,8 @@ services:
   invoice-manager:
     build: .
     container_name: invoice-image-manager
-    # Ports - Dokploy will handle external mapping via reverse proxy
-    # For local testing: uncomment the ports section below
-    # ports:
-    #   - "3000:3000"
-    #   - "8000:8000"
-    expose:
-      - "3000"
-      - "8000"
+    ports:
+      - "3000:3000"
     environment:
       - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-https://20250731.xyz/claude}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-4-5-20250929}
@@ -26,6 +20,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.invoice-manager.rule=PathPrefix(`/`)"
+      - "traefik.http.services.invoice-manager.loadbalancer.server.port=3000"
 
 volumes:
   uploaded_files:
