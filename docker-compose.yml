@@ -1,10 +1,16 @@
 services:
   invoice-manager:
     build: .
+    env_file:
+      - .env
     environment:
+      - HOST=0.0.0.0
+      - HOSTNAME=0.0.0.0
       - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-https://20250731.xyz/claude}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-4-5-20250929}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    expose:
+      - "3000"
     volumes:
       - uploaded_files:/app/public/uploaded_files
     networks:
@@ -19,6 +25,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.invoice-manager.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.invoice-manager.entrypoints=web,websecure"
+      - "traefik.http.routers.invoice-manager.tls=true"
       - "traefik.http.services.invoice-manager.loadbalancer.server.port=3000"
 
 volumes:
