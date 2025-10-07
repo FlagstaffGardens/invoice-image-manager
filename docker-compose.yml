@@ -1,28 +1,25 @@
 services:
   invoice-manager:
     build: .
-    expose:
-      - "80"
+    ports:
+      - "3000:3000"
     environment:
       - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-https://20250731.xyz/claude}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-4-5-20250929}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - API_URL=${API_URL:-}
     volumes:
-      - uploaded_files:/app/uploaded_files
-      - app_data:/app/data
+      - uploaded_files:/app/public/uploaded_files
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 10s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.invoice-manager.rule=PathPrefix(`/`)"
-      - "traefik.http.services.invoice-manager.loadbalancer.server.port=80"
+      - "traefik.http.services.invoice-manager.loadbalancer.server.port=3000"
 
 volumes:
   uploaded_files:
-  app_data:

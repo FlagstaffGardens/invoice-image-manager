@@ -1,37 +1,43 @@
-FROM python:3.13-slim
+FROM node:20-alpine AS base
 
+# Install dependencies only when needed
+FROM base AS deps
 WORKDIR /app
 
-# Install system dependencies including nginx and supervisor
-RUN apt-get update && apt-get install -y \
-    curl \
-    unzip \
-    nginx \
-    supervisor \
-    && rm -rf /var/lib/apt/lists/*
+COPY package.json package-lock.json* ./
+RUN npm ci
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Initialize Reflex
-RUN reflex init
+RUN npm run build
+
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+
+# Automatically leverage output traces to reduce image size
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Create upload directory
-RUN mkdir -p uploaded_files
+RUN mkdir -p public/uploaded_files && chown -R nextjs:nodejs public
 
-# Copy nginx and supervisor configs
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+USER nextjs
 
-# Expose single port for Traefik
-EXPOSE 80
+EXPOSE 3000
 
-# Set environment to production
-ENV REFLEX_ENV=prod
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
 
-# Run supervisor to manage nginx, frontend, and backend
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["node", "server.js"]

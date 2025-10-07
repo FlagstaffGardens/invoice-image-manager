@@ -1,6 +1,6 @@
 # 📸 Invoice Image Manager
 
-AI-powered invoice processing tool that extracts data from invoice images using Claude Vision API. Built with Reflex for a modern, reactive UI.
+AI-powered invoice processing tool that extracts data from invoice images using Claude Vision API. Built with Next.js 15 + TypeScript for a modern, reactive UI.
 
 ## ✨ Features
 
@@ -84,29 +84,41 @@ http://localhost:3000
 ## 🛠️ Local Development
 
 ```bash
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
 # Install dependencies
-pip install -r requirements.txt
+npm install
 
-# Run app
-reflex run
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
 ```
 
 ## 📁 Project Structure
 
 ```
 invoice-mypak/
-├── invoice_mypak/          # Main app code
-│   └── invoice_mypak.py    # UI and state management
-├── invoice_extractor.py    # AI extraction logic
-├── rxconfig.py            # Reflex config
-├── requirements.txt       # Python dependencies
-├── Dockerfile            # Docker image
-├── docker-compose.yml    # Docker orchestration
-└── .env.example         # Example environment config
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   │   ├── upload/        # File upload endpoint
+│   │   ├── process/       # Invoice extraction endpoint
+│   │   ├── export/        # CSV export endpoint
+│   │   └── delete/        # File deletion endpoint
+│   ├── page.tsx           # Main UI page
+│   ├── layout.tsx         # Root layout
+│   └── globals.css        # Global styles
+├── lib/                   # Utilities
+│   ├── extract-invoice.ts # Claude extraction logic
+│   └── types.ts           # TypeScript types
+├── public/                # Static files
+│   └── uploaded_files/    # Uploaded invoices
+├── package.json           # Node dependencies
+├── Dockerfile             # Docker image
+├── docker-compose.yml     # Docker orchestration
+└── .env.example           # Example environment config
 ```
 
 ## 🌍 Environment Variables
@@ -141,9 +153,10 @@ docker-compose up --build -d
 
 ## 🔧 Tech Stack
 
-- **Backend**: Python 3.13, Reflex
-- **AI**: Claude Vision API (Anthropic)
-- **Frontend**: React (via Reflex)
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **AI**: Claude Vision API (Anthropic SDK)
 - **Deployment**: Docker + Docker Compose
 
 ## 📝 License
