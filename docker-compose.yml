@@ -1,9 +1,8 @@
 services:
   invoice-manager:
     build: .
-    container_name: invoice-image-manager
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-https://20250731.xyz/claude}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-4-5-20250929}
