@@ -1,16 +1,15 @@
 services:
   invoice-manager:
     build: .
-    expose:
-      - "3000"
+    ports:
+      - "3000:3000"
+      - "8000:8000"
     environment:
       - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-https://20250731.xyz/claude}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-4-5-20250929}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     volumes:
-      # Persist uploaded files
       - uploaded_files:/app/uploaded_files
-      # Persist database/state
       - app_data:/app/data
     restart: unless-stopped
     healthcheck:
@@ -19,10 +18,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.invoice-manager.rule=PathPrefix(`/`)"
-      - "traefik.http.services.invoice-manager.loadbalancer.server.port=3000"
 
 volumes:
   uploaded_files:
