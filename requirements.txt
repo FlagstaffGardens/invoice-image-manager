@@ -1,0 +1,8 @@
+# Invoice Image Manager - Python Dependencies
+
+# Web framework (includes starlette, pydantic, etc.)
+reflex>=0.8.14
+
+# API calls and environment
+httpx>=0.28.0
+python-dotenv>=1.0.0
