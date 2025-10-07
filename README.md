@@ -52,14 +52,16 @@ ANTHROPIC_API_KEY=cr_your_key_here
 # Easy way - use test script
 ./test-docker.sh
 
-# Or manually
-docker-compose up --build -d
+# Or manually (use LOCAL docker-compose file)
+docker-compose -f docker-compose.local.yml up --build -d
 ```
 
-5. **Open browser:**
+5. **Open browser at localhost:3000:**
 ```
 http://localhost:3000
 ```
+
+**Note:** For local testing, use `docker-compose.local.yml` which exposes ports. The main `docker-compose.yml` is configured for Dokploy's Traefik reverse proxy.
 
 ### 🚢 Deploy to Dokploy
 
@@ -117,19 +119,25 @@ invoice-mypak/
 
 ## 🐳 Docker Commands
 
+**For Local Development:**
 ```bash
-# Start
-docker-compose up -d
+# Start (localhost:3000)
+docker-compose -f docker-compose.local.yml up -d
 
 # Stop
-docker-compose down
+docker-compose -f docker-compose.local.yml down
 
 # View logs
-docker-compose logs -f
+docker-compose -f docker-compose.local.yml logs -f
 
 # Rebuild after changes
-docker-compose up -d --build
+docker-compose -f docker-compose.local.yml up --build -d
 ```
+
+**For Dokploy Deployment:**
+- Use main `docker-compose.yml` (configured for Traefik)
+- Dokploy handles port mapping automatically
+- No manual port configuration needed
 
 ## 💡 Usage Tips
 

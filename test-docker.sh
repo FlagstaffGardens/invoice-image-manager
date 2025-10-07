@@ -28,12 +28,12 @@ echo ""
 
 # Stop any existing containers
 echo "🧹 Cleaning up old containers..."
-docker-compose down 2>/dev/null
+docker-compose -f docker-compose.local.yml down 2>/dev/null
 
 # Build and start
 echo ""
 echo "🔨 Building Docker image (this may take 2-3 minutes)..."
-docker-compose up --build -d
+docker-compose -f docker-compose.local.yml up --build -d
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -45,10 +45,10 @@ if [ $? -eq 0 ]; then
     echo "   3. Drop an invoice image to test"
     echo ""
     echo "📊 View logs:"
-    echo "   docker-compose logs -f"
+    echo "   docker-compose -f docker-compose.local.yml logs -f"
     echo ""
     echo "🛑 Stop container:"
-    echo "   docker-compose down"
+    echo "   docker-compose -f docker-compose.local.yml down"
 else
     echo ""
     echo "❌ BUILD FAILED!"

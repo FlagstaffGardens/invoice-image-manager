@@ -21,20 +21,28 @@ cp .env.example .env
 # Edit .env with your real API key
 ```
 
-### Step 3: Build and Test
+### Step 3: Build and Test (LOCAL)
 ```bash
-docker-compose up --build
+# IMPORTANT: Use docker-compose.local.yml for local testing
+docker-compose -f docker-compose.local.yml up --build
+
+# Or use the test script
+./test-docker.sh
 ```
 
-### Step 4: Verify
-- Open http://localhost:3000
+**Why two docker-compose files?**
+- `docker-compose.local.yml` - Exposes ports for localhost:3000
+- `docker-compose.yml` - Configured for Dokploy's Traefik reverse proxy (no port binding)
+
+### Step 4: Verify at localhost:3000
+- Open **http://localhost:3000** (MUST work locally)
 - Drop a test invoice
 - Check it processes correctly
 - Download CSV to verify data
 
 ### Step 5: Stop
 ```bash
-docker-compose down
+docker-compose -f docker-compose.local.yml down
 ```
 
 ## ☁️ Deploy to Dokploy
