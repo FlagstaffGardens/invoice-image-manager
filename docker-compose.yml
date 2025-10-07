@@ -24,7 +24,10 @@ services:
       start_period: 10s
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=dokploy-network"
+      - "traefik.docker.network=${TRAEFIK_NETWORK:-dokploy-network}"
+      - "traefik.http.routers.invoice-manager.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.invoice-manager.entrypoints=web,websecure"
+      - "traefik.http.routers.invoice-manager.tls=true"
       - "traefik.http.services.invoice-manager.loadbalancer.server.port=3000"
 
 volumes:
@@ -33,4 +36,4 @@ volumes:
 networks:
   traefik:
     external: true
-    name: dokploy-network
+    name: ${TRAEFIK_NETWORK:-dokploy-network}
