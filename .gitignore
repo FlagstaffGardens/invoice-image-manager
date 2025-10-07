@@ -1,7 +1,15 @@
+# Next.js
+node_modules/
+.next/
+out/
+package-lock.json
+
+# Reflex (old)
 assets/external/
 .states
 .web
 *.db
+
 # Python
 __pycache__/
 *.py[cod]
@@ -11,14 +19,13 @@ __pycache__/
 venv/
 env/
 ENV/
+# Allow tracking of app/lib directory (Python envs already covered above)
 build/
 develop-eggs/
 dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
 parts/
 sdist/
 var/
