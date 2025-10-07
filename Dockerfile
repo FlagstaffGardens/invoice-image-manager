@@ -21,11 +21,11 @@ COPY . .
 # Create upload directory
 RUN mkdir -p uploaded_files
 
-# Expose ports (internal to container)
-EXPOSE 3000 8000
+# Expose backend port (serves both frontend and API in prod)
+EXPOSE 8000
 
 # Set environment to production
 ENV REFLEX_ENV=prod
 
-# Run reflex in production mode (frontend 3000, backend 8000)
-CMD ["reflex", "run", "--env", "prod", "--backend-host", "0.0.0.0"]
+# Run reflex in production mode on port 8000
+CMD ["reflex", "run", "--env", "prod", "--backend-host", "0.0.0.0", "--backend-port", "8000"]
