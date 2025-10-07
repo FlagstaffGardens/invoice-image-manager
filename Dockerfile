@@ -27,5 +27,5 @@ EXPOSE 8000
 # Set environment to production
 ENV REFLEX_ENV=prod
 
-# Run reflex in production mode on port 8000
-CMD ["reflex", "run", "--env", "prod", "--backend-host", "0.0.0.0", "--backend-port", "8000"]
+# Run reflex in production mode (backend serves everything)
+CMD ["reflex", "run", "--env", "prod", "--backend-host", "0.0.0.0"]
