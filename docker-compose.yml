@@ -1,14 +1,14 @@
 services:
   invoice-manager:
     build: .
-    ports:
-      - "3000:3000"
     environment:
       - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-https://20250731.xyz/claude}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-4-5-20250929}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     volumes:
       - uploaded_files:/app/public/uploaded_files
+    networks:
+      - traefik
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
@@ -23,3 +23,8 @@ services:
 
 volumes:
   uploaded_files:
+
+networks:
+  traefik:
+    external: true
+    name: dokploy-network
