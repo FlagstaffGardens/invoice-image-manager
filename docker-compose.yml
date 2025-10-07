@@ -19,8 +19,16 @@ services:
       start_period: 40s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.invoice-manager.rule=PathPrefix(`/`)"
-      - "traefik.http.services.invoice-manager.loadbalancer.server.port=3000"
+      # Backend WebSocket routes (higher priority)
+      - "traefik.http.routers.invoice-backend.rule=PathPrefix(`/_event`) || PathPrefix(`/ping`)"
+      - "traefik.http.routers.invoice-backend.priority=100"
+      - "traefik.http.routers.invoice-backend.service=invoice-backend"
+      - "traefik.http.services.invoice-backend.loadbalancer.server.port=8000"
+      # Frontend routes (lower priority)
+      - "traefik.http.routers.invoice-frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.invoice-frontend.priority=1"
+      - "traefik.http.routers.invoice-frontend.service=invoice-frontend"
+      - "traefik.http.services.invoice-frontend.loadbalancer.server.port=3000"
 
 volumes:
   uploaded_files:
