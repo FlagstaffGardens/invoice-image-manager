@@ -24,9 +24,7 @@ services:
       start_period: 10s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.invoice-manager.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.invoice-manager.entrypoints=web,websecure"
-      - "traefik.http.routers.invoice-manager.tls=true"
+      - "traefik.docker.network=dokploy-network"
       - "traefik.http.services.invoice-manager.loadbalancer.server.port=3000"
 
 volumes:
