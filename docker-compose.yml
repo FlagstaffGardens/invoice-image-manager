@@ -25,10 +25,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=${TRAEFIK_NETWORK:-dokploy-network}"
-      - "traefik.http.routers.invoice-manager-web.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.invoice-manager-web.rule=Host(`invoicemypak-walg5u-fffba1-152-53-36-121.traefik.me`)"
       - "traefik.http.routers.invoice-manager-web.entrypoints=web"
       - "traefik.http.routers.invoice-manager-web.service=invoice-manager"
-      - "traefik.http.routers.invoice-manager-websecure.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.invoice-manager-websecure.rule=Host(`invoicemypak-walg5u-fffba1-152-53-36-121.traefik.me`)"
       - "traefik.http.routers.invoice-manager-websecure.entrypoints=websecure"
       - "traefik.http.routers.invoice-manager-websecure.tls=true"
       - "traefik.http.routers.invoice-manager-websecure.service=invoice-manager"
