@@ -7,7 +7,6 @@ services:
       - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-https://20250731.xyz/claude}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-4-5-20250929}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - ENV=prod
     volumes:
       - uploaded_files:/app/uploaded_files
       - app_data:/app/data
