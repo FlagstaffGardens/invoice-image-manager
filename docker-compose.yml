@@ -2,7 +2,7 @@ services:
   invoice-manager:
     build: .
     expose:
-      - "8000"
+      - "80"
     environment:
       - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-https://20250731.xyz/claude}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-4-5-20250929}
@@ -12,7 +12,7 @@ services:
       - app_data:/app/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -20,7 +20,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.invoice-manager.rule=PathPrefix(`/`)"
-      - "traefik.http.services.invoice-manager.loadbalancer.server.port=8000"
+      - "traefik.http.services.invoice-manager.loadbalancer.server.port=80"
 
 volumes:
   uploaded_files:
