@@ -50,8 +50,11 @@ wheels/
 # Invoice processing
 Expenses/
 uploads/
-uploaded_files/
 public/uploaded_files/
+# Allow the API route but ignore uploaded image files
+!app/uploaded_files/
+app/uploaded_files/*
+!app/uploaded_files/[filename]/
 *.jpg
 *.jpeg
 *.png
