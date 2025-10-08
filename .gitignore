@@ -51,6 +51,7 @@ wheels/
 Expenses/
 uploads/
 uploaded_files/
+public/uploaded_files/
 *.jpg
 *.jpeg
 *.png

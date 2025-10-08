@@ -21,65 +21,32 @@ AI-powered invoice processing tool that extracts data from invoice images using 
 - **Description** (items purchased)
 - **Category** (Fuel, Food, Office, etc.)
 
-## 🚀 Quick Start with Docker
+## 🚀 Quick Start (Local)
 
 ### Prerequisites
-- Docker Desktop installed and running
-- Get API key from Anthropic
+- Node.js 18+ and npm
+- Anthropic API key
 
-### Local Docker Setup
-
-1. **Start Docker Desktop first!**
-   - Open Docker Desktop app
-   - Wait for it to start (icon in menu bar)
-
-2. **Clone and setup:**
+### Setup
 ```bash
 git clone <repo-url>
 cd invoice-mypak
+npm install
 cp .env.example .env
+# Edit .env and set your ANTHROPIC_API_KEY
 ```
 
-3. **Edit `.env` with your API key:**
-```env
-ANTHROPIC_BASE_URL=https://20250731.xyz/claude
-ANTHROPIC_MODEL=claude-sonnet-4-5-20250929
-ANTHROPIC_API_KEY=cr_your_key_here
-```
-
-4. **Build and run:**
+### Run
 ```bash
-# Easy way - use test script
-./test-docker.sh
+# Development
+npm run dev
 
-# Or manually
-docker-compose up --build -d
+# Production build
+npm run build
+npm start
 ```
 
-5. **Open browser:**
-```
-http://localhost:3000
-```
-
-### 🚢 Deploy to Dokploy
-
-1. **In Dokploy dashboard:**
-   - Create new app → Docker Compose
-   - Connect your Git repository
-   - Set build path to `/`
-
-2. **Add environment variables:**
-   ```
-   ANTHROPIC_API_KEY=your_key_here
-   ANTHROPIC_BASE_URL=https://20250731.xyz/claude
-   ANTHROPIC_MODEL=claude-sonnet-4-5-20250929
-   ```
-
-3. **Deploy settings:**
-   - Port: `3000` (main app)
-   - Health check path: `/`
-
-4. **Click Deploy!**
+Then open http://localhost:3000
 
 ## 🛠️ Local Development
 
@@ -116,32 +83,14 @@ invoice-mypak/
 ├── public/                # Static files
 │   └── uploaded_files/    # Uploaded invoices
 ├── package.json           # Node dependencies
-├── Dockerfile             # Docker image
-├── docker-compose.yml     # Docker orchestration
 └── .env.example           # Example environment config
 ```
 
 ## 🌍 Environment Variables
 
-- `ANTHROPIC_BASE_URL` - API endpoint (default: https://20250731.xyz/claude)
-- `ANTHROPIC_MODEL` - Model to use (default: claude-sonnet-4-5-20250929)
 - `ANTHROPIC_API_KEY` - Your Anthropic API key (required)
-
-## 🐳 Docker Commands
-
-```bash
-# Start
-docker-compose up -d
-
-# Stop
-docker-compose down
-
-# View logs
-docker-compose logs -f
-
-# Rebuild after changes
-docker-compose up --build -d
-```
+- `ANTHROPIC_MODEL` - Model to use (default: `claude-3-5-sonnet-latest`)
+- `ANTHROPIC_BASE_URL` - Optional custom base URL; leave unset to use Anthropic’s official API
 
 ## 💡 Usage Tips
 
@@ -157,7 +106,6 @@ docker-compose up --build -d
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **AI**: Claude Vision API (Anthropic SDK)
-- **Deployment**: Docker + Docker Compose
 
 ## 📝 License
 

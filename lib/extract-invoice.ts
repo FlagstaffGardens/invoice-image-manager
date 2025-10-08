@@ -1,12 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk'
 import fs from 'fs/promises'
 import path from 'path'
 
 interface InvoiceExtraction {
   date: string
   abn: string
-  amount_inc_gst: string
-  gst: string
+  amount_inc_gst: string | number
+  gst: string | number
   description: string
   category: string
 }
@@ -22,14 +21,29 @@ interface ExtractionResult {
 export async function extractInvoiceData(
   imagePath: string
 ): Promise<ExtractionResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  const baseUrl = process.env.ANTHROPIC_BASE_URL || 'https://20250731.xyz/claude'
-  const model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5-20250929'
+  // Optional local dev bypass
+  if (process.env.MOCK_EXTRACTION === 'true' || process.env.MOCK_EXTRACTION === '1') {
+    return {
+      status: 'success',
+      file: path.basename(imagePath),
+      data: {
+        date: '01/10/2025',
+        abn: '12 345 678 901',
+        amount_inc_gst: '$42.90',
+        gst: '$3.90',
+        description: 'Fuel purchase',
+        category: 'Fuel',
+      },
+    }
+  }
+  const apiKey = process.env.OPENAI_API_KEY
+  const baseUrl = process.env.OPENAI_BASE_URL || 'https://20250731.xyz/openai'
+  const model = process.env.OPENAI_MODEL || 'gpt-4o'
 
   if (!apiKey) {
     return {
       status: 'error',
-      message: 'ANTHROPIC_API_KEY not found in environment',
+      message: 'OPENAI_API_KEY not found in environment',
     }
   }
 
@@ -78,40 +92,50 @@ Rules:
 - Choose the most appropriate category based on the merchant and items purchased
 - Use Australian dollar format with $ sign`
 
-    const userPrompt = `Extract the invoice data from this image and return it in the specified JSON format.
+    const userPrompt = `Extract invoice data and return ONLY a valid JSON object with these EXACT field names:
 
-Make sure to:
-- Extract the transaction date and format as DD/MM/YYYY
-- Find the ABN (usually 11 digits, may be formatted as XX XXX XXX XXX)
-- Get the total amount including GST
-- Extract or calculate the GST amount
-- Summarize what was purchased
-- Categorize the expense appropriately
+{
+  "date": "DD/MM/YYYY",
+  "abn": "11-digit ABN or 'Not found'",
+  "amount_inc_gst": "$XX.XX",
+  "gst": "$X.XX",
+  "description": "Brief description",
+  "category": "Category name"
+}
 
-Return ONLY the JSON object, no additional text.`
+INSTRUCTIONS:
+- DATE: Find transaction/invoice date. Format as DD/MM/YYYY with 4-digit year
+- ABN: Find Australian Business Number (11 digits, may have spaces)
+- AMOUNT_INC_GST: Total amount paid/charged (including GST)
+- GST: Tax amount. If not shown, calculate: Total ÷ 11
+- DESCRIPTION: What was purchased (be specific)
+- CATEGORY: Choose from: Food & Dining, Fuel, Transport, Office Supplies, Postage, Accommodation, Utilities, Other
 
-    // Create client
-    const client = new Anthropic({
-      apiKey,
-      baseURL: baseUrl,
-    })
+Return ONLY the JSON object. No markdown code blocks. No explanations.`
 
-    // Make request
-    const response = await client.messages.create({
+    // Make API request using OpenAI format
+    const apiUrl = `${baseUrl}/v1/chat/completions`
+    const headers = {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    }
+
+    const payload = {
       model,
       max_tokens: 1024,
       temperature: 0.2,
-      system: systemPrompt,
       messages: [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
         {
           role: 'user',
           content: [
             {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: mediaType as any,
-                data: base64Image,
+              type: 'image_url',
+              image_url: {
+                url: `data:${mediaType};base64,${base64Image}`,
               },
             },
             {
@@ -121,12 +145,38 @@ Return ONLY the JSON object, no additional text.`
           ],
         },
       ],
-    })
+    }
 
-    // Extract text
-    const content = response.content
-    if (content && content.length > 0 && content[0].type === 'text') {
-      let textContent = content[0].text
+    let response
+    try {
+      const apiResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      })
+
+      if (!apiResponse.ok) {
+        const errorText = await apiResponse.text()
+        return {
+          status: 'error',
+          message: `API request failed (${apiResponse.status}): ${errorText}`,
+          file: path.basename(imagePath),
+        }
+      }
+
+      response = await apiResponse.json()
+    } catch (err: any) {
+      return {
+        status: 'error',
+        message: `API request failed: ${err?.message || String(err)}`,
+        file: path.basename(imagePath),
+      }
+    }
+
+    // Extract text from OpenAI response format
+    const choices = response.choices
+    if (choices && choices.length > 0 && choices[0].message) {
+      let textContent = choices[0].message.content
 
       // Remove markdown code blocks if present
       if (textContent.includes('```json')) {
@@ -136,12 +186,41 @@ Return ONLY the JSON object, no additional text.`
       }
 
       try {
-        const invoiceData = JSON.parse(textContent) as InvoiceExtraction
+        const rawData = JSON.parse(textContent) as any
+
+        // Map response fields (handle both naming conventions)
+        const invoiceData: InvoiceExtraction = {
+          date: rawData.date || '⚠️ MISSING',
+          abn: rawData.abn || '⚠️ MISSING',
+          amount_inc_gst: rawData.amount_inc_gst || rawData.total_amount || '⚠️ MISSING',
+          gst: rawData.gst || rawData.gst_amount || '⚠️ MISSING',
+          description: rawData.description || '⚠️ MISSING',
+          category: rawData.category || '⚠️ MISSING',
+        }
+
+        // Ensure amount and GST are formatted as strings with $ sign
+        if (typeof invoiceData.amount_inc_gst === 'number') {
+          invoiceData.amount_inc_gst = `$${invoiceData.amount_inc_gst.toFixed(2)}`
+        } else if (invoiceData.amount_inc_gst && !invoiceData.amount_inc_gst.toString().startsWith('$')) {
+          const num = parseFloat(invoiceData.amount_inc_gst.toString())
+          if (!isNaN(num)) {
+            invoiceData.amount_inc_gst = `$${num.toFixed(2)}`
+          }
+        }
+
+        if (typeof invoiceData.gst === 'number') {
+          invoiceData.gst = `$${invoiceData.gst.toFixed(2)}`
+        } else if (invoiceData.gst && !invoiceData.gst.toString().startsWith('$')) {
+          const num = parseFloat(invoiceData.gst.toString())
+          if (!isNaN(num)) {
+            invoiceData.gst = `$${num.toFixed(2)}`
+          }
+        }
 
         return {
           status: 'success',
           file: path.basename(imagePath),
-          data: invoiceData,
+          data: invoiceData as any,
         }
       } catch (error) {
         return {

@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
     const result = await extractInvoiceData(filePath)
 
     if (result.status === 'error') {
+      console.error('Extraction error:', result.message)
       return NextResponse.json(
         { error: result.message || 'Extraction failed' },
         { status: 500 }

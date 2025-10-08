@@ -84,7 +84,14 @@ export default function HomePage() {
         body: JSON.stringify({ filename: uploadData.filename }),
       })
 
-      if (!processRes.ok) throw new Error('Processing failed')
+      if (!processRes.ok) {
+        let message = 'Processing failed'
+        try {
+          const err = await processRes.json()
+          if (err?.error) message = err.error
+        } catch {}
+        throw new Error(message)
+      }
 
       const processData = await processRes.json()
 
@@ -109,6 +116,9 @@ export default function HomePage() {
         prev.map((p) => (p.id === processingEntry.id ? { ...p, status: 'done' } : p))
       )
     } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message)
+      }
       // Update status: error
       setProcessing((prev) =>
         prev.map((p) =>
@@ -268,7 +278,11 @@ export default function HomePage() {
                           type="text"
                           value={inv.date}
                           onChange={(e) => updateInvoice(inv.id, 'date', e.target.value)}
-                          className="bg-gray-700 text-white px-2 py-1 rounded w-full"
+                          className={`px-2 py-1 rounded w-full ${
+                            inv.date.includes('⚠️') || !inv.date
+                              ? 'bg-red-900 text-red-200 border-2 border-red-500'
+                              : 'bg-gray-700 text-white'
+                          }`}
                         />
                       </td>
                       <td className="px-4 py-3">
@@ -276,7 +290,11 @@ export default function HomePage() {
                           type="text"
                           value={inv.abn}
                           onChange={(e) => updateInvoice(inv.id, 'abn', e.target.value)}
-                          className="bg-gray-700 text-white px-2 py-1 rounded w-full"
+                          className={`px-2 py-1 rounded w-full ${
+                            inv.abn.includes('⚠️') || !inv.abn
+                              ? 'bg-red-900 text-red-200 border-2 border-red-500'
+                              : 'bg-gray-700 text-white'
+                          }`}
                         />
                       </td>
                       <td className="px-4 py-3">
@@ -284,7 +302,11 @@ export default function HomePage() {
                           type="text"
                           value={inv.amount}
                           onChange={(e) => updateInvoice(inv.id, 'amount', e.target.value)}
-                          className="bg-gray-700 text-white px-2 py-1 rounded w-full"
+                          className={`px-2 py-1 rounded w-full ${
+                            inv.amount.includes('⚠️') || !inv.amount
+                              ? 'bg-red-900 text-red-200 border-2 border-red-500'
+                              : 'bg-gray-700 text-white'
+                          }`}
                         />
                       </td>
                       <td className="px-4 py-3">
@@ -292,7 +314,11 @@ export default function HomePage() {
                           type="text"
                           value={inv.gst}
                           onChange={(e) => updateInvoice(inv.id, 'gst', e.target.value)}
-                          className="bg-gray-700 text-white px-2 py-1 rounded w-full"
+                          className={`px-2 py-1 rounded w-full ${
+                            inv.gst.includes('⚠️') || !inv.gst
+                              ? 'bg-red-900 text-red-200 border-2 border-red-500'
+                              : 'bg-gray-700 text-white'
+                          }`}
                         />
                       </td>
                       <td className="px-4 py-3">
@@ -300,7 +326,11 @@ export default function HomePage() {
                           type="text"
                           value={inv.description}
                           onChange={(e) => updateInvoice(inv.id, 'description', e.target.value)}
-                          className="bg-gray-700 text-white px-2 py-1 rounded w-full"
+                          className={`px-2 py-1 rounded w-full ${
+                            inv.description.includes('⚠️') || !inv.description
+                              ? 'bg-red-900 text-red-200 border-2 border-red-500'
+                              : 'bg-gray-700 text-white'
+                          }`}
                         />
                       </td>
                       <td className="px-4 py-3">
@@ -308,7 +338,11 @@ export default function HomePage() {
                           type="text"
                           value={inv.category}
                           onChange={(e) => updateInvoice(inv.id, 'category', e.target.value)}
-                          className="bg-gray-700 text-white px-2 py-1 rounded w-full"
+                          className={`px-2 py-1 rounded w-full ${
+                            inv.category.includes('⚠️') || !inv.category
+                              ? 'bg-red-900 text-red-200 border-2 border-red-500'
+                              : 'bg-gray-700 text-white'
+                          }`}
                         />
                       </td>
                       <td className="px-4 py-3">
