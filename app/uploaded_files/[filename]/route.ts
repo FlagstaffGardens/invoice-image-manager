@@ -6,10 +6,10 @@ export const runtime = 'nodejs'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename: string } }
+  { params }: { params: Promise<{ filename: string }> }
 ) {
   try {
-    const filename = params.filename
+    const { filename } = await params
     const uploadDir = path.join(process.cwd(), 'public', 'uploaded_files')
     const filePath = path.join(uploadDir, filename)
 
@@ -26,7 +26,7 @@ export async function GET(
     }
     const contentType = contentTypeMap[ext] || 'application/octet-stream'
 
-    return new NextResponse(fileBuffer, {
+    return new NextResponse(new Uint8Array(fileBuffer), {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=31536000, immutable',
