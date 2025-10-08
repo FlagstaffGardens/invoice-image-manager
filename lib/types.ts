@@ -8,7 +8,7 @@ export interface InvoiceData {
   gst: string
   description: string
   category: string
-  status: 'queued' | 'uploading' | 'extracting' | 'done' | 'error'
+  status: 'processing' | 'queued' | 'uploading' | 'extracting' | 'done' | 'error'
   error?: string
 }
 
