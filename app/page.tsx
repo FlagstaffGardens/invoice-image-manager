@@ -53,25 +53,7 @@ export default function HomePage() {
 
   // Process single file
   async function processFile(file: File, processingEntry: ProcessingFile) {
-    // Create blob URL for immediate image display
-    const blobUrl = URL.createObjectURL(file)
-
-    // Add invoice entry immediately with blob URL
     const invoiceId = Math.random().toString(36).substr(2, 9)
-    const newInvoice: InvoiceData = {
-      id: invoiceId,
-      filename: file.name,
-      imagePath: blobUrl,
-      date: '',
-      abn: '',
-      amount: '',
-      gst: '',
-      description: '',
-      category: '',
-      status: 'processing',
-    }
-
-    setInvoices((prev) => [...prev, newInvoice])
 
     try {
       // Update status: uploading
@@ -79,7 +61,7 @@ export default function HomePage() {
         prev.map((p) => (p.id === processingEntry.id ? { ...p, status: 'uploading' } : p))
       )
 
-      // Upload file
+      // Upload file first
       const formData = new FormData()
       formData.append('file', file)
 
@@ -91,6 +73,22 @@ export default function HomePage() {
       if (!uploadRes.ok) throw new Error('Upload failed')
 
       const uploadData = await uploadRes.json()
+
+      // Add invoice entry immediately after upload with server path
+      const newInvoice: InvoiceData = {
+        id: invoiceId,
+        filename: uploadData.filename,
+        imagePath: `/uploaded_files/${uploadData.filename}`,
+        date: '',
+        abn: '',
+        amount: '',
+        gst: '',
+        description: '',
+        category: '',
+        status: 'processing',
+      }
+
+      setInvoices((prev) => [...prev, newInvoice])
 
       // Update status: extracting
       setProcessing((prev) =>
@@ -121,7 +119,6 @@ export default function HomePage() {
           inv.id === invoiceId
             ? {
                 ...inv,
-                filename: uploadData.filename,
                 date: processData.data.date || '',
                 abn: processData.data.abn || '',
                 amount: processData.data.amount_inc_gst || '',
