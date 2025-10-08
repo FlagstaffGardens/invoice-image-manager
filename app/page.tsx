@@ -53,6 +53,26 @@ export default function HomePage() {
 
   // Process single file
   async function processFile(file: File, processingEntry: ProcessingFile) {
+    // Create blob URL for immediate image display
+    const blobUrl = URL.createObjectURL(file)
+
+    // Add invoice entry immediately with blob URL
+    const invoiceId = Math.random().toString(36).substr(2, 9)
+    const newInvoice: InvoiceData = {
+      id: invoiceId,
+      filename: file.name,
+      imagePath: blobUrl,
+      date: '',
+      abn: '',
+      amount: '',
+      gst: '',
+      description: '',
+      category: '',
+      status: 'processing',
+    }
+
+    setInvoices((prev) => [...prev, newInvoice])
+
     try {
       // Update status: uploading
       setProcessing((prev) =>
@@ -95,21 +115,24 @@ export default function HomePage() {
 
       const processData = await processRes.json()
 
-      // Add to invoices
-      const newInvoice: InvoiceData = {
-        id: Math.random().toString(36).substr(2, 9),
-        filename: uploadData.filename,
-        imagePath: uploadData.path,
-        date: processData.data.date || '',
-        abn: processData.data.abn || '',
-        amount: processData.data.amount_inc_gst || '',
-        gst: processData.data.gst || '',
-        description: processData.data.description || '',
-        category: processData.data.category || '',
-        status: 'done',
-      }
-
-      setInvoices((prev) => [...prev, newInvoice])
+      // Update invoice with extracted data
+      setInvoices((prev) =>
+        prev.map((inv) =>
+          inv.id === invoiceId
+            ? {
+                ...inv,
+                filename: uploadData.filename,
+                date: processData.data.date || '',
+                abn: processData.data.abn || '',
+                amount: processData.data.amount_inc_gst || '',
+                gst: processData.data.gst || '',
+                description: processData.data.description || '',
+                category: processData.data.category || '',
+                status: 'done',
+              }
+            : inv
+        )
+      )
 
       // Update status: done
       setProcessing((prev) =>
@@ -119,6 +142,14 @@ export default function HomePage() {
       if (error instanceof Error) {
         alert(error.message)
       }
+      // Mark invoice as error
+      setInvoices((prev) =>
+        prev.map((inv) =>
+          inv.id === invoiceId
+            ? { ...inv, status: 'error' }
+            : inv
+        )
+      )
       // Update status: error
       setProcessing((prev) =>
         prev.map((p) =>
@@ -264,14 +295,23 @@ export default function HomePage() {
                 </thead>
                 <tbody>
                   {invoices.map((inv) => (
-                    <tr key={inv.id} className="border-t border-gray-700 hover:bg-gray-750">
+                    <tr key={inv.id} className={`border-t border-gray-700 hover:bg-gray-750 ${
+                      inv.status === 'processing' ? 'opacity-60 animate-pulse' : ''
+                    }`}>
                       <td className="px-4 py-3">
-                        <img
-                          src={inv.imagePath}
-                          alt="Invoice"
-                          className="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-80"
-                          onClick={() => setPreviewImage(inv.imagePath)}
-                        />
+                        <div className="relative">
+                          <img
+                            src={inv.imagePath}
+                            alt="Invoice"
+                            className="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-80"
+                            onClick={() => setPreviewImage(inv.imagePath)}
+                          />
+                          {inv.status === 'processing' && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded">
+                              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <input
