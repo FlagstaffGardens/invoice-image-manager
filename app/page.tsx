@@ -55,13 +55,32 @@ export default function HomePage() {
   async function processFile(file: File, processingEntry: ProcessingFile) {
     const invoiceId = Math.random().toString(36).substr(2, 9)
 
+    // Create blob URL for immediate display
+    const blobUrl = URL.createObjectURL(file)
+
+    // Add invoice IMMEDIATELY with blob URL so image shows right away
+    const newInvoice: InvoiceData = {
+      id: invoiceId,
+      filename: file.name,
+      imagePath: blobUrl,
+      date: '',
+      abn: '',
+      amount: '',
+      gst: '',
+      description: '',
+      category: '',
+      status: 'processing',
+    }
+
+    setInvoices((prev) => [...prev, newInvoice])
+
     try {
       // Update status: uploading
       setProcessing((prev) =>
         prev.map((p) => (p.id === processingEntry.id ? { ...p, status: 'uploading' } : p))
       )
 
-      // Upload file first
+      // Upload file for processing
       const formData = new FormData()
       formData.append('file', file)
 
@@ -73,22 +92,6 @@ export default function HomePage() {
       if (!uploadRes.ok) throw new Error('Upload failed')
 
       const uploadData = await uploadRes.json()
-
-      // Add invoice entry immediately after upload with server path
-      const newInvoice: InvoiceData = {
-        id: invoiceId,
-        filename: uploadData.filename,
-        imagePath: `/uploaded_files/${uploadData.filename}`,
-        date: '',
-        abn: '',
-        amount: '',
-        gst: '',
-        description: '',
-        category: '',
-        status: 'processing',
-      }
-
-      setInvoices((prev) => [...prev, newInvoice])
 
       // Update status: extracting
       setProcessing((prev) =>
@@ -113,12 +116,13 @@ export default function HomePage() {
 
       const processData = await processRes.json()
 
-      // Update invoice with extracted data
+      // Update invoice with extracted data (keep blob URL for image)
       setInvoices((prev) =>
         prev.map((inv) =>
           inv.id === invoiceId
             ? {
                 ...inv,
+                filename: uploadData.filename,
                 date: processData.data.date || '',
                 abn: processData.data.abn || '',
                 amount: processData.data.amount_inc_gst || '',

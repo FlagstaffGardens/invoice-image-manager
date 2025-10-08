@@ -10,12 +10,8 @@ export async function GET(
 ) {
   try {
     const { filename } = await params
-    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'public', 'uploaded_files')
+    const uploadDir = path.join(process.cwd(), 'public', 'uploaded_files')
     const filePath = path.join(uploadDir, filename)
-
-    console.log('Serving file from:', filePath)
-    console.log('Upload dir:', uploadDir)
-    console.log('CWD:', process.cwd())
 
     const fileBuffer = await readFile(filePath)
 
