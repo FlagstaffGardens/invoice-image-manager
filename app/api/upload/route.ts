@@ -23,8 +23,11 @@ export async function POST(request: NextRequest) {
     const uniqueFilename = `${uniqueId}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
     // Create upload directory if it doesn't exist
-    const uploadDir = path.join(process.cwd(), 'public', 'uploaded_files')
+    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'public', 'uploaded_files')
     await mkdir(uploadDir, { recursive: true })
+
+    console.log('Upload directory:', uploadDir)
+    console.log('CWD:', process.cwd())
 
     // Save file
     const filePath = path.join(uploadDir, uniqueFilename)
